@@ -7,8 +7,10 @@ use App\Models\Document;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Throwable;
 
 class DocumentController extends Controller
 {
@@ -446,5 +448,54 @@ class DocumentController extends Controller
         return redirect()->back()->with('error', __(
             'can\'t find approval for you',
         ));
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Document $document
+     * @return \Illuminate\Http\Response
+     */
+    public function saveApproverFor(Request $request, Document $document)
+    {
+        $request->validate([
+            'approvers.*.id' => 'required|integer|exists:approvers,id',
+            'approvers.*.position' => 'required|integer|min:0',
+            'approvers.*.user.id' => 'required|integer|exists:users,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $request->collect('approvers')
+                    ->map(function ($approver) use (&$i) {
+                        return collect(array_merge(
+                            $approver, [
+                                'position' => ++$i,
+                            ]
+                        ));
+                    })
+                    ->each(function ($approver) {
+                        return Approver::where('id', $approver['id'])
+                                        ->update($approver->only([
+                                            'approverable_id',
+                                            'approverable_type',
+                                            'user_id',
+                                            'position',
+                                        ])->toArray());
+                    });
+
+            DB::commit();
+
+            return redirect()->back()->with('success', __(
+                'approvers has been updated',
+            ));
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', __(
+                $e->getMessage(),
+            ));
+        }
+
     }
 }

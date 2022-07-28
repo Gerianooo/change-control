@@ -7,6 +7,7 @@ import Card from '@/Components/Card.vue'
 import Icon from '@/Components/Icon.vue'
 import Swal from 'sweetalert2'
 import { Inertia } from '@inertiajs/inertia'
+import Draggable from 'vuedraggable'
 
 const self = getCurrentInstance()
 const { approvers, document, users } = defineProps({
@@ -19,6 +20,16 @@ const form = useForm({
   id: null,
   user: null,
 })
+
+const options = {
+  animation: 200,
+  group: "description",
+  disabled: false,
+  ghostClass: "ghost"
+}
+
+const lists = ref([...approvers])
+const drag = ref(false)
 
 const open = ref(false)
 const show = () => {
@@ -68,11 +79,12 @@ const detach = async approver => {
     showCloseButton: true,
   })
 
-  response.isConfirmed && Inertia.delete(route('document.approver.detach', approver.id))
+  response.isConfirmed && Inertia.delete(route('document.approver.detach', approver.id), {
+    onSuccess: () => {
+      Inertia.get(route(route().current(), document.id))
+    },
+  })
 }
-
-const up = approver => Inertia.patch(route('approver.up', approver.id))
-const down = approver => Inertia.patch(route('approver.down', approver.id))
 
 const rounded = () => {
   const { wrapper } = self.refs
@@ -82,6 +94,19 @@ const rounded = () => {
       i === 0 && child.classList?.add('rounded-l-md')
       i + 1 === parent.childNodes.length && child.classList?.add('rounded-r-md')
     })
+  })
+}
+
+const change = () => {
+  Swal.showLoading()
+
+  return useForm({
+    approvers: lists.value,
+  }).patch(route('document.approver.save', document.id), {
+    onSuccess: () => {
+      Inertia.get(route(route().current(), document.id))
+      Swal.close()
+    },
   })
 }
 
@@ -117,20 +142,31 @@ onUpdated(rounded)
       </template>
 
       <template #body>
-        <div class="flex flex-col space-y-2 p-4">
-          <div v-for="(approver, i) in approvers" :key="i" class="flex items-center justify-between bg-slate-200 hover:bg-slate-100 dark:bg-gray-800 dark:hover:bg-gray-600 rounded-md px-4 py-2">
-            <div class="flex items-center space-x-1">
-              <p>{{ approver.position }}</p>
-              <p class="uppercase">{{ approver.user.name }}</p>
-            </div>
+        <div class="flex flex-col space-y-2 p-4 w-2/3">
+          <Draggable
+            tag="div"
+            v-model="lists"
+            v-bind="options"
+            @start="drag = true"
+            @end="drag = false"
+            item-key="position"
+            @change="change"
+          >
+            <template #item="{ element }">
+              <div class="list-group-item dark:bg-gray-800 m-1 px-4 py-2 rounded-md uppercase">
+                <div class="flex items-center space-x-2 justify-between">
+                  <p>
+                    {{ element.position }}. {{ element.user.name }}
+                  </p>
 
-            <div ref="wrapper" class="flex items-center">
-              <Icon @click.prevent="up(approver)" v-if="approver.position > 1" name="arrow-up" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-gray-700 transition-all cursor-pointer" />
-              <Icon @click.prevent="down(approver)" v-if="approver.position !== approvers.length" name="arrow-down" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-gray-700 transition-all cursor-pointer" />
-              <Icon @click.prevent="edit(approver)" name="edit" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white transition-all cursor-pointer" />
-              <Icon @click.prevent="detach(approver)" name="trash" class="px-2 py-1 bg-red-600 hover:bg-red-600 text-white transition-all cursor-pointer" />
-            </div>
-          </div>
+                  <div class="flex-none">
+                    <Icon @click.prevent="edit(element)" name="edit" class="px-2 py-1 rounded-l-md bg-blue-600 hover:bg-blue-700 text-sm text-white transition-all" />
+                    <Icon @click.prevent="detach(element)" name="trash" class="px-2 py-1 rounded-r-md bg-red-600 hover:bg-red-700 text-sm text-white transition-all" />
+                  </div>
+                </div>
+              </div>
+            </template>
+          </Draggable>
         </div>
       </template>
     </Card>
@@ -181,3 +217,28 @@ onUpdated(rounded)
     </div>
   </transition>
 </template>
+
+<style>
+.button {
+  margin-top: 35px;
+}
+.flip-list-move {
+  transition: transform 0.5s;
+}
+.no-move {
+  transition: transform 0s;
+}
+.ghost {
+  opacity: 0.5;
+  background: #c8ebfb;
+}
+.list-group {
+  min-height: 20px;
+}
+.list-group-item {
+  cursor: move;
+}
+.list-group-item i {
+  cursor: pointer;
+}
+</style>

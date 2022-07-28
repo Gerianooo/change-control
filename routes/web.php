@@ -45,6 +45,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::post('/{document}/request', 'request')->name('approval.request');
         Route::patch('/{document}/approve', 'approve')->name('approve');
         Route::patch('/{document}/reject', 'reject')->name('reject');
+
+        Route::patch('/{document}/approver/save', 'saveApproverFor')->name('approver.save');
     });
 
     Route::resource('revision', App\Http\Controllers\RevisionController::class);
