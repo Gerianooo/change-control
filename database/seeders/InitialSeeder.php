@@ -45,7 +45,21 @@ class InitialSeeder extends Seeder
 
         $su->assignRole('superuser');
 
-        collect(['user', 'permission', 'role', 'menu'])->each(function ($name) {
+        $mr = Role::create([
+            'name' => 'mr',
+            'guard_name' => 'web',
+        ]);
+
+        $mr1 = User::create([
+            'name' => 'mr1',
+            'email' => 'mr1@batch.record',
+            'username' => 'mr1',
+            'password' => $password,
+        ]);
+
+        $mr1->assignRole('mr');
+
+        collect(['user', 'permission', 'role', 'menu', 'document', 'revision', 'content'])->each(function ($name) {
             collect(['create', 'read', 'update', 'delete'])->each(function ($ability) use ($name) {
                 Permission::create([
                     'name' => sprintf('%s %s', $ability, $name),
@@ -53,5 +67,17 @@ class InitialSeeder extends Seeder
                 ]);
             });
         });
+
+        $mr->givePermissionTo([
+            'create document',
+            'read document',
+            'update document',
+            'delete document',
+            
+            'create revision',
+            'read revision',
+            'update revision',
+            'delete revision',
+        ]);
     }
 }

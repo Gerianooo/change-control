@@ -98,5 +98,53 @@ class MenuSeeder extends Seeder
                 'create menu', 'read menu', 'update menu', 'delete menu',
             ])->get(['id'])
         );
+
+        $master = Menu::create([
+            'name' => 'master',
+            'icon' => 'server',
+            'position' => 3,
+        ]);
+
+        $document = $master->childs()->create([
+            'name' => 'document',
+            'icon' => 'newspaper',
+            'route_or_url' => 'document.index',
+            'position' => 1,
+            'actives' => [
+                'document.*',
+            ],
+        ]);
+
+        $document->permissions()->attach(
+            Permission::whereIn('name', [
+                'read document',
+            ])->get()->pluck('id')
+        );
+
+        $approvals = Menu::create([
+            'name' => 'approvals',
+            'icon' => 'list-check',
+            'position' => 4,
+        ]);
+
+        $approvals->childs()->create([
+            'name' => 'document',
+            'icon' => 'newspaper',
+            'route_or_url' => 'approval.document.index',
+            'position' => 1,
+            'actives' => [
+                'approval.document.*',
+            ],
+        ]);
+
+        $approvals->childs()->create([
+            'name' => 'revision',
+            'icon' => 'list-ol',
+            'route_or_url' => 'approval.revision.index',
+            'position' => 2,
+            'actives' => [
+                'approval.revision.*',
+            ],
+        ]);
     }
 }
