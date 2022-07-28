@@ -30,7 +30,12 @@ const can = (abilities) => {
   }
 }
 
+const __ = (text, replacement) => {
+  return text
+}
+
 window.can = can
+window.__ = __
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -42,6 +47,7 @@ createInertiaApp({
             .mixin({
                 methods: {
                     can,
+                    __,
                     themes: () => Themes,
                 },
             })

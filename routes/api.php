@@ -17,6 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('/v1')->name('api.v1.')->group(function () {
     Route::get('/user/{user}/menu', fn (App\Models\User $user) => $user->menus())->name('user.menu');
 
+    Route::post('/document', [App\Http\Controllers\DocumentController::class, 'paginate'])->name('document.paginate');
+    Route::post('/document/{document}/revisions', [App\Http\Controllers\RevisionController::class, 'paginate'])->name('revision.paginate');
+    Route::get('/revision/{revision}/procedures', [App\Http\Controllers\RevisionController::class, 'procedures'])->name('revision.procedures');
+
     Route::name('superuser.')->group(function () {
         Route::get('/superuser/permission', [App\Http\Controllers\Superuser\PermissionController::class, 'get'])->name('permission');
         Route::get('/superuser/role', [App\Http\Controllers\Superuser\RoleController::class, 'get'])->name('role');
