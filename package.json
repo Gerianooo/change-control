@@ -21,6 +21,7 @@
         "vue": "^3.2.31"
     },
     "dependencies": {
+        "@ckeditor/ckeditor5-vue": "^4.0.1",
         "@vueform/multiselect": "^2.5.1",
         "sweetalert2": "^11.4.23",
         "vuedraggable": "^4.1.0"

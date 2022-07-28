@@ -1,13 +1,11 @@
 <script setup>
 import { getCurrentInstance, ref, onMounted, onUpdated } from 'vue'
 import { useForm, Link } from '@inertiajs/inertia-vue3'
-import DashboardLayout from '@/Layouts/DashboardLayout'
-import Card from '@/Components/Card'
-import Icon from '@/Components/Icon'
+import DashboardLayout from '@/Layouts/DashboardLayout.vue'
+import Card from '@/Components/Card.vue'
+import Icon from '@/Components/Icon.vue'
 import CKEditor from '@ckeditor/ckeditor5-vue'
 import Swal from 'sweetalert2'
-// import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
-// import DecoupledEditor from 'ckeditor5-document-editor'
 
 const editor = CKSource.Editor
 const self = getCurrentInstance()
@@ -40,28 +38,32 @@ onMounted(getFromStorage)
 
 <template>
   <DashboardLayout :title="__('content')">
-    <div class="flex flex-col bg-white rounded-md">
-      <div class="flex items-center space-x-1 rounded-t-md p-2 bg-slate-200">
-        <Link :href="route('revision.edit', procedure.revision_id)" class="bg-slate-600 hover:bg-slate-700 rounded-md px-3 py-1 text-white text-sm transition-all">
-          <div class="flex items-center space-x-1">
-            <Icon name="caret-left" />
-            <p class="uppercase font-semibold">{{ __('back') }}</p>
-          </div>
-        </Link>
+    <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
+      <template #header>
+        <div class="flex items-center space-x-1 rounded-t-md p-2 bg-slate-200 dark:bg-gray-800">
+          <Link :href="route('revision.edit', procedure.revision_id)" class="bg-slate-600 hover:bg-slate-700 rounded-md px-3 py-1 text-white text-sm transition-all">
+            <div class="flex items-center space-x-1">
+              <Icon name="caret-left" />
+              <p class="uppercase font-semibold">{{ __('back') }}</p>
+            </div>
+          </Link>
 
-        <button type="submit" form="form" class="bg-green-600 hover:bg-green-700 rounded-md px-3 py-1 text-white text-sm transition-all">
-          <div class="flex items-center space-x-1">
-            <Icon name="check" />
-            <p class="uppercase font-semibold">{{ __('save') }}</p>
-          </div>
-        </button>
-      </div>
-
-      <form id="form" @submit.prevent="submit" class="flex flex-col">
-        <div class="rounded">
-          <CKEditorComponent v-model="form.value" :editor="editor" :config="config" @input="saveToStorage" />
+          <button type="submit" form="form" class="bg-green-600 hover:bg-green-700 rounded-md px-3 py-1 text-white text-sm transition-all">
+            <div class="flex items-center space-x-1">
+              <Icon name="check" />
+              <p class="uppercase font-semibold">{{ __('save') }}</p>
+            </div>
+          </button>
         </div>
-      </form>
-    </div>
+      </template>
+
+      <template #body>
+        <form id="form" @submit.prevent="submit" class="flex flex-col">
+          <div class="rounded">
+            <CKEditorComponent v-model="form.value" :editor="editor" :config="config" @input="saveToStorage" />
+          </div>
+        </form>
+      </template>
+    </Card>
   </DashboardLayout>
 </template>

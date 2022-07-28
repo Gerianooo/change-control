@@ -12,6 +12,8 @@
         <!-- Icons -->
         <link rel="stylesheet" href="{{ url('/vendors/fontawesome/css/all.min.css') }}">
 
+        <script src="{{ asset('/vendors/ckeditor/all.min.js') }}"></script>
+
         <!-- Scripts -->
         @routes
         @vite('resources/js/app.js')
