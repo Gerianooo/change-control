@@ -50,11 +50,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::resource('revision', App\Http\Controllers\RevisionController::class);
 
     Route::resource('procedure', App\Http\Controllers\ProcedureController::class);
-    Route::prefix('/procedur')->name('procedur.')->controller(App\Http\Controllers\ProcedureController::class)->group(function () {
-        Route::patch('/{procedure}/left', 'left')->name('left');
-        Route::patch('/{procedure}/right', 'right')->name('right');
-        Route::patch('/{procedure}/up', 'up')->name('up');
-        Route::patch('/{procedure}/down', 'down')->name('down');
+    Route::prefix('/procedure/{procedure}')->name('procedure.')->controller(App\Http\Controllers\ProcedureController::class)->group(function () {
+        Route::patch('/left', 'left')->name('left');
+        Route::patch('/right', 'right')->name('right');
+        Route::patch('/up', 'up')->name('up');
+        Route::patch('/down', 'down')->name('down');
     });
 
     Route::patch('/procedure-drill', [App\Http\Controllers\ProcedureController::class, 'drill'])->name('procedure.drill');
