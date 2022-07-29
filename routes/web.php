@@ -52,6 +52,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::resource('revision', App\Http\Controllers\RevisionController::class);
 
     Route::resource('procedure', App\Http\Controllers\ProcedureController::class);
+    Route::patch('/procedure/{revision}/save', [App\Http\Controllers\ProcedureController::class, 'save'])->name('procedure.save');
     Route::prefix('/procedure/{procedure}')->name('procedure.')->controller(App\Http\Controllers\ProcedureController::class)->group(function () {
         Route::patch('/left', 'left')->name('left');
         Route::patch('/right', 'right')->name('right');

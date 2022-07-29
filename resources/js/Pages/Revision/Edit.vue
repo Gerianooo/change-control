@@ -8,8 +8,10 @@ import Icon from '@/Components/Icon.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import Builder from './Builder.vue'
+import Nested from './Nested.vue'
 
 const self = getCurrentInstance()
+const timeout = ref(null)
 const { revision } = defineProps({
   revision: Object,
 })
@@ -82,6 +84,15 @@ const update = () => {
   })
 }
 
+const save = async () => {
+  timeout.value && clearTimeout(timeout.value)
+  timeout.value = setTimeout(() => {
+    return useForm({procedures: procedures.value}).patch(route('procedure.save', revision.id), {
+      onFinish: () => clearTimeout(timeout.value),
+    })
+  }, 100)
+}
+
 const submit = () => form.id ? update() : store()
 
 Inertia.on('finish', () => {
@@ -117,7 +128,7 @@ onMounted(fetch)
 
       <template #body>
         <div class="flex flex-col space-y-4 p-4">
-          <Builder v-if="a" :procedures="procedures" :refresh="fetch" :edit="edit" />
+          <Nested v-if="a && procedures" :procedures="procedures" :save="save" :edit="edit" />
         </div>
       </template>
     </Card>

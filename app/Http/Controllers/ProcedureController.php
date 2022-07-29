@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Procedure;
 use App\Models\Revision;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Throwable;
 
 class ProcedureController extends Controller
 {
@@ -305,5 +308,73 @@ class ProcedureController extends Controller
         return redirect()->back()->with('success', __(
             'position has been updated',
         ));
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Revision $revision
+     * @return \Illuminate\Http\Response
+     */
+    public function save(Request $request, Revision $revision)
+    {
+        $procedures = collect($this->positions($request->procedures))->flatMap(function ($procedure) {
+            return $this->flatMap($procedure);
+        });
+        
+        DB::beginTransaction();
+
+        try {
+            $procedures->each(function (Procedure $procedure) {
+                Procedure::where('id', $procedure->id)->update($procedure->only([
+                    'revision_id',
+                    'parent_id',
+                    'name',
+                    'position',
+                ]));
+            });
+
+            DB::commit();
+
+            return redirect()->back()->with('success', __(
+                'position has been updated',
+            ));
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', __(
+                $e->getMessage()
+            ));
+        }
+    }
+
+    /**
+     * @param array|\App\Models\Procedure $procedure
+     * @return array
+     */
+    private function flatMap(array|Collection|Procedure $procedure)
+    {
+        return [
+            $procedure,
+            ...collect($procedure->childs)->flatMap(function ($procedure) {
+                return $this->flatMap($procedure);
+            }),
+        ];
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection|\App\Models\Menu|array
+     * @param int $parent
+     */
+    private function positions(Collection|Procedure|array $procedures, int $parent = null)
+    {
+        return array_map(function ($procedure) use (&$i, $parent) {
+            $new = new Procedure($procedure);
+            $new->id = $procedure['id'];
+            $new->position = ++$i;
+            $new->parent_id = $parent;
+            $new->childs = array_key_exists('childs', $procedure) ? $this->positions($procedure['childs'], $new->id) : [];
+
+            return $new;
+        }, $procedures);
     }
 }
