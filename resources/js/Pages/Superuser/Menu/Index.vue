@@ -61,6 +61,7 @@ const store = () => {
     onSuccess: () => {
       close()
       form.reset()
+      Inertia.get(route(route().current()))
     },
 
     onError: () => {
@@ -85,6 +86,7 @@ const update = () => {
     onSuccess: () => {
       close()
       form.reset()
+      Inertia.get(route(route().current()))
     },
 
     onError: () => {
@@ -102,13 +104,24 @@ const destroy = async menu => {
     showCancelButton: true,
   })
 
-  response.isConfirmed && Inertia.delete(route('superuser.menu.destroy', menu.id))
+  response.isConfirmed && Inertia.delete(route('superuser.menu.destroy', menu.id), {
+    onSuccess: () => Inertia.get(route(route().current()))
+  })
 }
 
 const submit = () => form.id ? update() : store()
 
+const timeout = ref(null)
 const save = () => {
-  return useForm({ menus: menus.value }).patch(route('superuser.menu.save'))
+  timeout.value && clearTimeout(timeout.value)
+  timeout.value = setTimeout(() => {
+    return useForm({ menus: menus.value }).patch(route('superuser.menu.save'), {
+      onFinish: () => {
+        clearTimeout(timeout.value)
+        Inertia.get(route(route().current()))
+      }
+    }, 100)
+  })
 }
 
 const esc = e => e.key === 'Escape' && close()
@@ -117,8 +130,6 @@ Inertia.on('finish', () => {
   a.value = false
   nextTick(() => a.value = true)
 })
-
-Inertia.on('finish', () => fetch())
 
 onMounted(fetch)
 onMounted(() => window.addEventListener('keydown', esc))
@@ -142,19 +153,8 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
       </template>
 
       <template #body>
-        <div class="flex flex-col space-y-1 p-2 max-h-96 overflow-auto">
-          <Nested :menus="menus" :edit="edit" :destroy="destroy" />
-        </div>
-      </template>
-
-      <template #footer>
-        <div class="flex items-center space-x-1 dark:bg-gray-800 p-2">
-          <button @click.prevent="save" class="bg-green-600 hover:bg-green-700 rounded-md px-3 py-1 text-sm text-white transition-all">
-            <div class="flex items-center space-x-1">
-              <Icon name="save" />
-              <p class="uppercase font-semibold">save</p>
-            </div>
-          </button>
+        <div class="flex flex-col space-y-1 p-2">
+          <Nested :menus="menus" :edit="edit" :destroy="destroy" :save="save" />
         </div>
       </template>
     </Card>

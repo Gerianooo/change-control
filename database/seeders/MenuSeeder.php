@@ -146,5 +146,23 @@ class MenuSeeder extends Seeder
                 'approval.revision.*',
             ],
         ]);
+
+        $activities = Menu::create([
+            'name' => 'activities',
+            'icon' => 'address-card',
+            'position' => 5,
+            'deleteable' => false,
+        ]);
+
+        $activities->childs()->create([
+            'name' => 'login',
+            'route_or_url' => 'superuser.activity.login',
+            'icon' => 'user-clock',
+            'position' => 1,
+            'deleteable' => false,
+            'actives' => [
+                'superuser.activity.login',
+            ],
+        ]);
     }
 }

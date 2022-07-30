@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('/v1')->name('api.v1.')->group(function () {
+Route::prefix('/v1')->name('api.v1.')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/{user}/menu', fn (App\Models\User $user) => $user->menus())->name('user.menu');
 
     Route::post('/document', [App\Http\Controllers\DocumentController::class, 'paginate'])->name('document.paginate');
@@ -26,6 +26,9 @@ Route::prefix('/v1')->name('api.v1.')->group(function () {
         Route::get('/superuser/role', [App\Http\Controllers\Superuser\RoleController::class, 'get'])->name('role');
         Route::post('/superuser/role/paginate', [App\Http\Controllers\Superuser\RoleController::class, 'paginate'])->name('role.paginate');
         Route::post('/superuser/user/paginate', [App\Http\Controllers\Superuser\UserController::class, 'paginate'])->name('user.paginate');
+        Route::post('/superuser/activity/login', [App\Http\Controllers\ActivityController::class, 'logins'])->name('activity.login');
         Route::get('/superuser/menu', [App\Http\Controllers\Superuser\MenuController::class, 'get'])->name('menu');
     });
+
+    Route::get('/user', fn () => request()->user());
 });
