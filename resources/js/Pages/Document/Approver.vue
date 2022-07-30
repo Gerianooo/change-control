@@ -8,6 +8,12 @@ import Icon from '@/Components/Icon.vue'
 import Swal from 'sweetalert2'
 import { Inertia } from '@inertiajs/inertia'
 import Draggable from 'vuedraggable'
+import Modal from '@/Components/Modal.vue'
+import Close from '@/Components/Button/Close.vue'
+import ButtonGreen from '@/Components/Button/Green.vue'
+import ButtonBlue from '@/Components/Button/Blue.vue'
+import ButtonRed from '@/Components/Button/Red.vue'
+import ButtonDark from '@/Components/Button/Dark.vue'
 
 const self = getCurrentInstance()
 const { approvers, document, users } = defineProps({
@@ -34,7 +40,10 @@ const drag = ref(false)
 const open = ref(false)
 const show = () => {
   open.value = true
-  nextTick(() => self.refs.user?.focus())
+  nextTick(() => {
+    self.refs.user?.focus()
+    self.refs.user?.close()
+  })
 }
 
 const close = () => {
@@ -46,7 +55,9 @@ const store = () => {
     document: document.id,
     user: form.user
   }), {
-    onSuccess: () => close() || form.reset(),
+    onSuccess: () => {
+      Inertia.get(route(route().current(), document.id))
+    },
     onError: () => show(),
   })
 }
@@ -125,19 +136,17 @@ onUpdated(rounded)
     <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
       <template #header>
         <div class="flex items-center space-x-2 bg-slate-200 dark:bg-gray-800 p-2 rounded-t-md">
-          <Link :href="route('document.index')" class="bg-slate-600 hover:bg-slate-700 rounded-md px-3 py-1 text-sm text-white transition-all">
-            <div class="flex items-center space-x-1">
+          <Link :href="route('document.index')">
+            <ButtonDark class="bg-gray-700">
               <Icon name="caret-left" />
               <p class="uppercase font-semibold">{{ __('back') }}</p>
-            </div>
+            </ButtonDark>
           </Link>
 
-          <button @click.prevent="show" class="bg-green-600 hover:bg-green-700 rounded-md px-3 py-1 text-sm text-white transition-all">
-            <div class="flex items-center space-x-1">
-              <Icon name="plus" />
-              <p class="uppercase font-semibold">{{ __('add') }}</p>
-            </div>
-          </button>
+          <ButtonGreen @click.prevent="show">
+            <Icon name="plus" />
+            <p class="uppercase font-semibold">{{ __('add') }}</p>
+          </ButtonGreen>
         </div>
       </template>
 
@@ -172,50 +181,48 @@ onUpdated(rounded)
     </Card>
   </DashboardLayout>
 
-  <transition name="fade">
-    <div v-if="open" class="fixed top-0 left-0 w-full h-screen flex items-center justify-center bg-black bg-opacity-40">
-      <form @submit.prevent="submit" class="w-full max-w-xl rounded-md">
-        <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
-          <template #header>
-            <div class="flex items-center justify-end space-x-1 bg-slate-200 dark:bg-gray-800 rounded-t-md p-2">
-              <Icon @click.prevent="close" name="times" class="px-2 py-1 rounded-md bg-red-500 hover:bg-red-600 transition-all cursor-pointer text-white" />
-            </div>
-          </template>
+  <Modal :show="open">
+    <form @submit.prevent="submit" class="w-full max-w-xl rounded-md">
+      <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
+        <template #header>
+          <div class="flex items-center justify-end space-x-1 bg-slate-200 dark:bg-gray-800 rounded-t-md p-2">
+            <Close @click.prevent="close" />
+          </div>
+        </template>
 
-          <template #body>
-            <div class="flex flex-col space-y-2 p-4">
-              <div class="flex items-center space-x-2">
-                <label for="user" class="lowercase first-letter:capitalize flex-none w-1/4">{{ __('user') }}</label>
-                <div class="w-full">
-                  <Select
-                    v-model="form.user"
-                    ref="user"
-                    :options="users.map(u => ({
-                      label: u.name,
-                      value: u.id,
-                    }))"
-                    :searchable="true"
-                    class="uppercase text-gray-800"
-                    required />
-                </div>
+        <template #body>
+          <div class="flex flex-col space-y-2 p-4">
+            <div class="flex items-center space-x-2">
+              <label for="user" class="lowercase first-letter:capitalize flex-none w-1/4">{{ __('user') }}</label>
+              <div class="w-full">
+                <Select
+                  v-model="form.user"
+                  ref="user"
+                  :options="users.map(u => ({
+                    label: u.name,
+                    value: u.id,
+                  }))"
+                  :searchable="true"
+                  class="uppercase text-gray-800"
+                  required />
               </div>
             </div>
-          </template>
+          </div>
+        </template>
 
-          <template #footer>
-            <div class="flex items-center space-x-2 justify-end bg-slate-200 dark:bg-gray-800 rounded-b-md px-2 py-1">
-              <button type="submit" class="bg-slate-600 hover:bg-slate-700 rounded-md px-3 py-1 text-white text-sm transition-all">
-                <div class="flex items-center space-x-1">
-                  <Icon name="check" />
-                  <p class="uppercase font-semibold">{{ form.id ? 'update' : 'add' }}</p>
-                </div>
-              </button>
-            </div>
-          </template>
-        </Card>
-      </form>
-    </div>
-  </transition>
+        <template #footer>
+          <div class="flex items-center space-x-2 justify-end bg-slate-200 dark:bg-gray-800 rounded-b-md px-2 py-1">
+            <ButtonGreen type="submit">
+              <div class="flex items-center space-x-1">
+                <Icon name="check" />
+                <p class="uppercase font-semibold">{{ form.id ? 'update' : 'add' }}</p>
+              </div>
+            </ButtonGreen>
+          </div>
+        </template>
+      </Card>
+    </form>
+  </Modal>
 </template>
 
 <style>

@@ -7,6 +7,12 @@ import DataTable from '@/Components/DataTable/Builder.vue'
 import Th from '@/Components/DataTable/Th.vue'
 import Card from '@/Components/Card.vue'
 import Icon from '@/Components/Icon.vue'
+import Modal from '@/Components/Modal.vue'
+import Close from '@/Components/Button/Close.vue'
+import ButtonGreen from '@/Components/Button/Green.vue'
+import ButtonBlue from '@/Components/Button/Blue.vue'
+import ButtonRed from '@/Components/Button/Red.vue'
+import Button from '@/Components/Button.vue'
 import Swal from 'sweetalert2'
 
 const self = getCurrentInstance()
@@ -108,7 +114,7 @@ const submit = () => {
       <template #body>
         <div class="p-4">
           <DataTable v-if="a" :url="route('api.v1.document.paginate')" :sticky="true">
-            <template v-slot:thead="table">
+            <template #thead="table">
               <tr class="bg-slate-100 dark:bg-gray-800">
                 <Th :table="table" :sort="false" class="border border-slate-200 dark:border-gray-900 text-center whitespace-nowrap px-1 py-2">no</Th>
                 <Th :table="table" :sort="true" name="name" class="border border-slate-200 dark:border-gray-900 text-center whitespace-nowrap px-3 py-2">{{ __('name') }}</Th>
@@ -121,7 +127,7 @@ const submit = () => {
               </tr>
             </template>
 
-            <template v-slot:tfoot="table">
+            <template #tfoot="table">
               <tr class="bg-slate-100 dark:bg-gray-800">
                 <Th :table="table" :sort="false" class="border border-slate-200 dark:border-gray-900 text-center whitespace-nowrap py-2">no</Th>
                 <Th :table="table" :sort="false" class="border border-slate-200 dark:border-gray-900 text-center whitespace-nowrap py-2">{{ __('name') }}</Th>
@@ -134,7 +140,7 @@ const submit = () => {
               </tr>
             </template>
 
-            <template v-slot:tbody="{ data, refresh }">
+            <template #tbody="{ data, refresh }">
               <tr v-for="(document, i) in data" :key="i">
                 <td class="border border-slate-200 dark:border-gray-900 text-center py-1">{{ i + 1 }}</td>
                 <td class="border border-slate-200 dark:border-gray-900 px-2 py-1">{{ document.name }}</td>
@@ -146,40 +152,30 @@ const submit = () => {
                 <td class="border border-slate-200 dark:border-gray-900 px-2 py-1">
                   <div class="flex items-center justify-center">
                     <div class="flex-wrap w-fit">
-                      <button v-if="document.approved" @click.prevent="Inertia.get(route('document.revisions', document.id))" class="bg-emerald-600 hover:bg-emerald-700 rounded-md px-3 py-1 text-sm transition-all m-[1px] text-white">
-                        <div class="flex items-center space-x-1">
-                          <Icon name="list" />
-                          <p class="uppercase font-semibold">{{ __('revisions') }}</p>
-                        </div>
-                      </button>
+                      <Button v-if="document.approved" @click.prevent="Inertia.get(route('document.revisions', document.id))" class="bg-emerald-600 hover:bg-emerald-700 m-[1px]">
+                        <Icon name="list" />
+                        <p class="uppercase font-semibold">{{ __('revisions') }}</p>
+                      </Button>
 
-                      <button v-if="document.approve ? false : (document.approved ? false : (document.rejected ? false : !document.pending))" @click.prevent="Inertia.get(route('document.approvers', document.id))" class="bg-orange-600 hover:bg-orange-700 rounded-md px-3 py-1 text-sm transition-all m-[1px] text-white">
-                        <div class="flex items-center space-x-1">
-                          <Icon name="user-cog" />
-                          <p class="uppercase font-semibold">{{ __('approvers') }}</p>
-                        </div>
-                      </button>
+                      <Button v-if="document.approve ? false : (document.approved ? false : (document.rejected ? false : !document.pending))" @click.prevent="Inertia.get(route('document.approvers', document.id))" class="bg-orange-600 hover:bg-orange-700 m-[1px]">
+                        <Icon name="user-cog" />
+                        <p class="uppercase font-semibold">{{ __('approvers') }}</p>
+                      </Button>
 
-                      <button v-if="document.approvers_count > 0 && !document.approved" @click.prevent="Inertia.get(route('document.approvals', document.id))" class="bg-cyan-600 hover:bg-cyan-700 rounded-md px-3 py-1 text-sm transition-all m-[1px] text-white">
-                        <div class="flex items-center space-x-1">
-                          <Icon name="user-check" />
-                          <p class="uppercase font-semibold">{{ __('approvals') }}</p>
-                        </div>
-                      </button>
+                      <Button v-if="document.approvers_count > 0 && !document.approved" @click.prevent="Inertia.get(route('document.approvals', document.id))" class="bg-cyan-600 hover:bg-cyan-700 m-[1px]">
+                        <Icon name="user-check" />
+                        <p class="uppercase font-semibold">{{ __('approvals') }}</p>
+                      </Button>
 
-                      <button v-if="document.approved ? false : (document.rejected ? true : !document.pending)" @click.prevent="edit(document, refresh)" class="bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 text-sm transition-all m-[1px] text-white">
-                        <div class="flex items-center space-x-1">
-                          <Icon name="edit" />
-                          <p class="uppercase font-semibold">{{ __('edit') }}</p>
-                        </div>
-                      </button>
+                      <ButtonBlue v-if="document.approved ? false : (document.rejected ? true : !document.pending)" @click.prevent="edit(document, refresh)" class="m-[1px]">
+                        <Icon name="edit" />
+                        <p class="uppercase font-semibold">{{ __('edit') }}</p>
+                      </ButtonBlue>
 
-                      <button v-if="document.approved ? false : (document.rejected ? true : !document.pending)" @click.prevent="destroy(document, refresh)" class="bg-red-600 hover:bg-red-700 rounded-md px-3 py-1 text-sm transition-all m-[1px] text-white">
-                        <div class="flex items-center space-x-1">
-                          <Icon name="edit" />
-                          <p class="uppercase font-semibold">{{ __('delete') }}</p>
-                        </div>
-                      </button>
+                      <ButtonRed v-if="document.approved ? false : (document.rejected ? true : !document.pending)" @click.prevent="destroy(document, refresh)" class="m-[1px]">
+                        <Icon name="edit" />
+                        <p class="uppercase font-semibold">{{ __('delete') }}</p>
+                      </ButtonRed>
                     </div>
                   </div>
                 </td>
@@ -197,59 +193,55 @@ const submit = () => {
     </Card>
   </DashboardLayout>
 
-  <transition name="fade">
-    <div v-if="open" class="fixed top-0 left-0 w-full h-screen flex items-center justify-center bg-black bg-opacity-40">
-      <form @submit.prevent="submit" class="w-full max-w-xl shadow-xl">
-        <Card class="flex flex-col space-y-4 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
-          <template #header>
-            <div class="flex items-center space-x-2 justify-end p-2 bg-slate-200 dark:bg-gray-800">
-              <Icon @click.prevent="close" name="times" class="px-2 py-1 rounded-md bg-slate-100 dark:bg-gray-700 dark:hover:bg-gray-600 hover:bg-slate-50 transition-all cursor-pointer" />
-            </div>
-          </template>
+  <Modal :show="open">
+    <form @submit.prevent="submit" class="w-full max-w-xl shadow-xl">
+      <Card class="flex flex-col space-y-4 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
+        <template #header>
+          <div class="flex items-center space-x-2 justify-end p-2 bg-slate-200 dark:bg-gray-800">
+            <Close @click.prevent="close" />
+          </div>
+        </template>
 
-          <template #body>
-            <div class="flex flex-col space-y-4 p-4">
-              <div class="flex flex-col space-y-2">
-                <div class="flex items-center space-x-2">
-                  <label for="name" class="lowercase first-letter:capitalize w-1/3">{{ __('name') }}</label>
-                  <input type="text" name="name" ref="name" v-model="form.name" class="w-full bg-transparent rounded-md border border-slate-200 dark:border-gray-900 px-3 py-1 uppercase" required :placeholder="__('name')">
-                </div>
-
-                <div v-if="form.errors.name" class="text-sm text-red-500 text-right">{{ form.errors.name }}</div>
+        <template #body>
+          <div class="flex flex-col space-y-4 p-4">
+            <div class="flex flex-col space-y-2">
+              <div class="flex items-center space-x-2">
+                <label for="name" class="lowercase first-letter:capitalize w-1/3">{{ __('name') }}</label>
+                <input type="text" name="name" ref="name" v-model="form.name" class="w-full bg-transparent rounded-md border border-slate-200 dark:border-gray-900 px-3 py-1 uppercase" required :placeholder="__('name')">
               </div>
 
-              <div class="flex flex-col space-y-2">
-                <div class="flex items-center space-x-2">
-                  <label for="code" class="lowercase first-letter:capitalize w-1/3">{{ __('code') }}</label>
-                  <input type="text" name="code" v-model="form.code" class="w-full bg-transparent rounded-md border border-slate-200 dark:border-gray-900 px-3 py-1 uppercase" required :placeholder="__('code')">
-                </div>
+              <div v-if="form.errors.name" class="text-sm text-red-500 text-right">{{ form.errors.name }}</div>
+            </div>
 
-                <div v-if="form.errors.code" class="text-sm text-red-500 text-right">{{ form.errors.code }}</div>
+            <div class="flex flex-col space-y-2">
+              <div class="flex items-center space-x-2">
+                <label for="code" class="lowercase first-letter:capitalize w-1/3">{{ __('code') }}</label>
+                <input type="text" name="code" v-model="form.code" class="w-full bg-transparent rounded-md border border-slate-200 dark:border-gray-900 px-3 py-1 uppercase" required :placeholder="__('code')">
               </div>
 
-              <div class="flex flex-col space-y-2">
-                <div class="flex items-center space-x-2">
-                  <label for="max_revision_interval" class="lowercase first-letter:capitalize w-1/3">{{ __('revision interval') }}</label>
-                  <input type="number" name="max_revision_interval" min="1" v-model="form.max_revision_interval" class="w-full bg-transparent rounded-md border border-slate-200 dark:border-gray-900 px-3 py-1 uppercase" required :placeholder="__('revision interval')">
-                </div>
+              <div v-if="form.errors.code" class="text-sm text-red-500 text-right">{{ form.errors.code }}</div>
+            </div>
 
-                <div v-if="form.errors.max_revision_interval" class="text-sm text-red-500 text-right">{{ form.errors.max_revision_interval }}</div>
+            <div class="flex flex-col space-y-2">
+              <div class="flex items-center space-x-2">
+                <label for="max_revision_interval" class="lowercase first-letter:capitalize w-1/3">{{ __('revision interval') }}</label>
+                <input type="number" name="max_revision_interval" min="1" v-model="form.max_revision_interval" class="w-full bg-transparent rounded-md border border-slate-200 dark:border-gray-900 px-3 py-1 uppercase" required :placeholder="__('revision interval')">
               </div>
-            </div>
-          </template>
 
-          <template #footer>
-            <div class="flex items-center justify-end space-x-2 px-2 py-1 bg-slate-200 dark:bg-gray-800 rounded-b-md">
-              <button type="submit" class="bg-green-600 hover:bg-green-700 rounded-md px-3 py-1 text-sm text-white transition-all">
-                <div class="flex items-center space-x-1">
-                  <Icon name="check" />
-                  <p class="uppercase font-semibold">{{ __(form.id ? 'update' : 'create') }}</p>
-                </div>
-              </button>
+              <div v-if="form.errors.max_revision_interval" class="text-sm text-red-500 text-right">{{ form.errors.max_revision_interval }}</div>
             </div>
-          </template>
-        </Card>
-      </form>
-    </div>
-  </transition>
+          </div>
+        </template>
+
+        <template #footer>
+          <div class="flex items-center justify-end space-x-2 px-2 py-1 bg-slate-200 dark:bg-gray-800 rounded-b-md">
+            <ButtonGreen type="submit">
+              <Icon name="check" />
+              <p class="uppercase font-semibold">{{ __(form.id ? 'update' : 'create') }}</p>
+            </ButtonGreen>
+          </div>
+        </template>
+      </Card>
+    </form>
+  </Modal>
 </template>

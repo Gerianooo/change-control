@@ -5,6 +5,13 @@ import DashboardLayout from '@/Layouts/DashboardLayout.vue';
 import Card from '@/Components/Card.vue';
 import Icon from '@/Components/Icon.vue';
 import { Inertia } from '@inertiajs/inertia';
+import Modal from '@/Components/Modal.vue'
+import Button from '@/Components/Button.vue'
+import Close from '@/Components/Button/Close.vue'
+import ButtonDark from '@/Components/Button/Dark.vue'
+import ButtonGreen from '@/Components/Button/Green.vue'
+import ButtonBlue from '@/Components/Button/Blue.vue'
+import ButtonRed from '@/Components/Button/Red.vue'
 
 const self = getCurrentInstance()
 const { document, approves, approvers } = defineProps({
@@ -36,19 +43,17 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
     <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
       <template #header>
         <div class="flex items-center space-x-2 bg-slate-200 dark:bg-gray-800 rounded-t-md p-2">
-          <Link :href="route('document.index')" class="bg-slate-600 hover:bg-slate-700 rounded-md px-3 py-1 text-sm text-white transition-all">
-            <div class="flex items-center space-x-1">
+          <Link :href="route('document.index')">
+            <ButtonDark class="bg-gray-700">
               <Icon name="caret-left" />
               <p class="uppercase font-semibold">{{ __('back') }}</p>
-            </div>
+            </ButtonDark>
           </Link>
 
-          <button v-if="(!document.pending && !document.approved) || document.rejected" @click.prevent="request" class="bg-green-600 hover:bg-green-700 rounded-md px-3 py-1 text-sm text-white transition-all">
-            <div class="flex items-center space-x-1">
-              <Icon name="plus" />
-              <p class="uppercase font-semibold">{{ __('request approval') }}</p>
-            </div>
-          </button>
+          <ButtonGreen v-if="(!document.pending && !document.approved) || document.rejected" @click.prevent="request">
+            <Icon name="plus" />
+            <p class="uppercase font-semibold">{{ __('request approval') }}</p>
+          </ButtonGreen>
         </div>
       </template>
 
@@ -79,14 +84,15 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
                   
                   <template v-for="(approval, j) in approve.approvals" :key="j">
                     <td class="border border-slate-300 dark:border-gray-900 text-center px-1">
-                      <button
-                        class="rounded-md px-3 py-1 text-sm text-white transition-all"
-                        :class="(approval.status === 'pending' && 'bg-orange-600 hover:bg-orange-700') || (approval.status === 'rejected' && 'bg-red-600 hover:bg-red-700') || (approval.status === 'approved' && 'bg-green-600 hover:bg-green-700  ')">
-                        <div class="flex items-center space-x-1">
-                          <Icon :name="(approval.status === 'pending' && 'sync') || (approval.status === 'rejected' && 'times') || (approval.status === 'approved' && 'check')" />
-                          <p class="uppercase font-semibold">{{ approval.status }}</p>
-                        </div>
-                      </button>
+                      <Button
+                        :class="{
+                          'bg-orange-600 hover:bg-orange-700': approval.status === 'pending',
+                          'bg-red-600 hover:bg-red-700': approval.status === 'rejected',
+                          'bg-green-600 hover:bg-green-700': approval.status === 'approved',
+                        }">
+                        <Icon :name="(approval.status === 'pending' && 'sync') || (approval.status === 'rejected' && 'times') || (approval.status === 'approved' && 'check')" />
+                        <p class="uppercase font-semibold">{{ approval.status }}</p>
+                      </Button>
                     </td>
 
                     <td class="border border-slate-300 dark:border-gray-900 text-center px-1">
@@ -94,12 +100,10 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
                     </td>
 
                     <td class="border border-slate-300 dark:border-gray-900 text-center px-1">
-                      <button v-if="approval.responder_note" @click.prevent="note = approval.responder_note" class="bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1 text-sm text-white transition-all">
-                        <div class="flex items-center space-x-1">
-                          <Icon name="newspaper" />
-                          <p class="uppercase font-semibold">{{ __('note') }}</p>
-                        </div>
-                      </button>
+                      <ButtonBlue v-if="approval.responder_note" @click.prevent="note = approval.responder_note">
+                        <Icon name="newspaper" />
+                        <p class="uppercase font-semibold">{{ __('note') }}</p>
+                      </ButtonBlue>
                     </td>
                   </template>
                 </tr>
@@ -111,21 +115,19 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
     </Card>
   </DashboardLayout>
 
-  <transition name="fade">
-    <div v-if="note" class="fixed top-0 left-0 w-full h-screen bg-black bg-opacity-40 flex items-center justify-center overflow-auto">
-      <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 w-full max-w-xl rounded-md shadow-xl">
-        <template #header>
-          <div class="flex items-center justify-end space-x-2 bg-slate-200 dark:bg-gray-800 rounded-t-md p-2">
-            <Icon @click.prevent="note = ''" name="times" class="bg-red-500 hover:bg-red-600 rounded-md px-2 py-1 text-sm text-white transition-all cursor-pointer" />
-          </div>
-        </template>
+  <Modal :show="note !== ''">
+    <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 w-full max-w-xl rounded-md shadow-xl">
+      <template #header>
+        <div class="flex items-center justify-end space-x-2 bg-slate-200 dark:bg-gray-800 rounded-t-md p-2">
+          <Close @click.prevent="note = ''" />
+        </div>
+      </template>
 
-        <template #body>
-          <div class="flex flex-col space-y-2 p-4 rounded-b-md">
-            <p>{{ note }}</p>
-          </div>
-        </template>
-      </Card>
-    </div>
-  </transition>
+      <template #body>
+        <div class="flex flex-col space-y-2 p-4 rounded-b-md">
+          <p>{{ note }}</p>
+        </div>
+      </template>
+    </Card>
+  </Modal>
 </template>

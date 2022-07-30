@@ -12,6 +12,10 @@ const { procedures, edit, save } = defineProps({
   edit: Function,
 })
 
+const click = element => {
+  Inertia.get(route('procedure.edit', element.revision_id))
+}
+
 const destroy = async procedure => {
   const response = await Swal.fire({
     title: 'Are you sure want to delete?',
@@ -34,9 +38,12 @@ const destroy = async procedure => {
     @change="save">
     <template #item="{ element }">
       <div class="flex flex-col space-y-1">
-        <div class="flex items-center space-x-2 bg-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-900 rounded-md px-4 py-2 transition-all">
-          <div class="flex items-center space-x-2 w-full">
-            <p class="font-bold">{{ element.position }}</p>
+        <div class="flex items-center space-x-2 bg-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-900 rounded-md px-4 py-2 transition-all cursor-move">
+          <div @click.prevent="!element.childs?.length && click(element)" class="flex items-center space-x-2 w-full" :class="{
+            'cursor-pointer': !element.childs?.length,
+            'cursor-move': !!element.childs?.length,
+          }">
+            <!-- <p class="font-bold">{{ element.position }}</p> -->
             <p class="uppercase">{{ element.name }}</p>
           </div>
 

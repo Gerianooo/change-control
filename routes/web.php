@@ -34,32 +34,25 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     });
 
     Route::resource('document', App\Http\Controllers\DocumentController::class);
-    Route::prefix('/document')->name('document.')->controller(App\Http\Controllers\DocumentController::class)->group(function () {
-        Route::get('/{document}/revisions', 'revisions')->name('revisions');
-        Route::get('/{document}/approvers', 'approvers')->name('approvers');
+    Route::prefix('/document/{document}')->name('document.')->controller(App\Http\Controllers\DocumentController::class)->group(function () {
+        Route::get('/revisions', 'revisions')->name('revisions');
+        Route::get('/approvers', 'approvers')->name('approvers');
+        Route::post('/approvers/{user}', 'addApproverFor')->name('approver.add');
+        Route::get('/approvals', 'approvals')->name('approvals');
+        Route::post('/request', 'request')->name('approval.request');
+        Route::patch('/approve', 'approve')->name('approve');
+        Route::patch('/reject', 'reject')->name('reject');
+        Route::patch('//approver/save', 'saveApproverFor')->name('approver.save');
+    });
+    Route::prefix('/document/{approver}')->name('document.')->controller(App\Http\Controllers\DocumentController::class)->group(function () {
         Route::delete('/{approver}/detach', 'detachApprover')->name('approver.detach');
-        Route::post('/{document}/approvers/{user}', 'addApproverFor')->name('approver.add');
         Route::patch('/{approver}/approvers/{user}', 'updateApprover')->name('approver.update');
-        Route::get('/{document}/approvals', 'approvals')->name('approvals');
-        Route::post('/{document}/request', 'request')->name('approval.request');
-        Route::patch('/{document}/approve', 'approve')->name('approve');
-        Route::patch('/{document}/reject', 'reject')->name('reject');
-
-        Route::patch('/{document}/approver/save', 'saveApproverFor')->name('approver.save');
     });
 
     Route::resource('revision', App\Http\Controllers\RevisionController::class);
 
     Route::resource('procedure', App\Http\Controllers\ProcedureController::class);
     Route::patch('/procedure/{revision}/save', [App\Http\Controllers\ProcedureController::class, 'save'])->name('procedure.save');
-    Route::prefix('/procedure/{procedure}')->name('procedure.')->controller(App\Http\Controllers\ProcedureController::class)->group(function () {
-        Route::patch('/left', 'left')->name('left');
-        Route::patch('/right', 'right')->name('right');
-        Route::patch('/up', 'up')->name('up');
-        Route::patch('/down', 'down')->name('down');
-    });
-
-    Route::patch('/procedure-drill', [App\Http\Controllers\ProcedureController::class, 'drill'])->name('procedure.drill');
 
     Route::resource('content', App\Http\Controllers\ContentController::class);
 
