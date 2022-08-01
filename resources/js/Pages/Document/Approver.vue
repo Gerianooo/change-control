@@ -133,7 +133,7 @@ onUpdated(rounded)
 <style src="@/multiselect.css"></style>
 
 <template>
-  <DashboardLayout title="Document Approver">
+  <DashboardLayout :title="__('Document Approver')">
     <Card class="bg-white dark:bg-gray-700 dark:text-gray-200">
       <template #header>
         <div class="flex items-center space-x-2 bg-slate-200 dark:bg-gray-800 p-2">

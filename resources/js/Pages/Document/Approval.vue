@@ -39,7 +39,7 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
 </script>
 
 <template>
-  <DashboardLayout :title="__('approval')">
+  <DashboardLayout :title="__('Document Approval')">
     <Card class="bg-white dark:bg-gray-700 dark:text-gray-200">
       <template #header>
         <div class="flex items-center space-x-2 bg-gray-200 dark:bg-gray-800 rounded-t-md p-2">

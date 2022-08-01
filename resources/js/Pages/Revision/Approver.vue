@@ -134,10 +134,10 @@ onUpdated(rounded)
 <style src="@/multiselect.css"></style>
 
 <template>
-  <DashboardLayout title="Document Approver">
-    <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
+  <DashboardLayout :title="__('Document Approver')">
+    <Card class="bg-white dark:bg-gray-700 dark:text-gray-200">
       <template #header>
-        <div class="flex items-center space-x-2 bg-slate-200 dark:bg-gray-800 p-2 rounded-t-md">
+        <div class="flex items-center space-x-2 bg-slate-200 dark:bg-gray-800 p-2">
           <Link :href="route('document.revisions', revision.document_id)">
             <ButtonDark class="bg-gray-700">
               <Icon name="caret-left" />
@@ -164,7 +164,7 @@ onUpdated(rounded)
             @change="change"
           >
             <template #item="{ element }">
-              <div class="list-group-item dark:bg-gray-800 m-1 px-4 py-2 rounded-md uppercase">
+              <div class="list-group-item dark:bg-gray-800 dark:hover:bg-gray-600 m-1 px-4 py-2 rounded-md uppercase transition-all duration-300">
                 <div class="flex items-center space-x-2 justify-between">
                   <p>
                     {{ element.position }}. {{ element.user.name }}
@@ -184,16 +184,16 @@ onUpdated(rounded)
   </DashboardLayout>
 
   <Modal :show="open">
-    <form @submit.prevent="submit" class="w-full max-w-xl rounded-md">
-      <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
+    <form @submit.prevent="submit" class="w-full max-w-xl h-fit shadow-xl">
+      <Card class="bg-white dark:bg-gray-700 dark:text-gray-200">
         <template #header>
-          <div class="flex items-center justify-end space-x-1 bg-slate-200 dark:bg-gray-800 rounded-t-md p-2">
+          <div class="flex items-center justify-end space-x-1 bg-slate-200 dark:bg-gray-800 p-2">
             <Close @click.prevent="close" />
           </div>
         </template>
 
         <template #body>
-          <div class="flex flex-col space-y-2 p-4">
+          <div class="p-4">
             <div class="flex items-center space-x-2">
               <label for="user" class="lowercase first-letter:capitalize flex-none w-1/4">{{ __('user') }}</label>
               <div class="w-full">
@@ -213,12 +213,10 @@ onUpdated(rounded)
         </template>
 
         <template #footer>
-          <div class="flex items-center space-x-2 justify-end bg-slate-200 dark:bg-gray-800 rounded-b-md px-2 py-1">
+          <div class="flex items-center space-x-2 justify-end bg-slate-200 dark:bg-gray-800 px-2 py-1">
             <ButtonGreen type="submit">
-              <div class="flex items-center space-x-1">
-                <Icon name="check" />
-                <p class="uppercase font-semibold">{{ form.id ? 'update' : 'add' }}</p>
-              </div>
+              <Icon name="check" />
+              <p class="uppercase font-semibold">{{ form.id ? 'update' : 'add' }}</p>
             </ButtonGreen>
           </div>
         </template>
