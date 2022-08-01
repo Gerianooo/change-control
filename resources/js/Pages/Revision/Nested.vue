@@ -13,7 +13,7 @@ const { procedures, edit, save } = defineProps({
 })
 
 const click = element => {
-  Inertia.get(route('procedure.edit', element.revision_id))
+  Inertia.get(route('procedure.edit', element.id))
 }
 
 const destroy = async procedure => {
