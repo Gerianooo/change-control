@@ -41,4 +41,16 @@ class Approver extends Model
     {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
+
+    /**
+     * @inheritdoc
+     */
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (Approver $approver) {
+            $approver->position = $approver->approverable->approvers->count() + 1;
+        });
+    }
 }
