@@ -1,5 +1,5 @@
 <script setup>
-import { getCurrentInstance, nextTick, ref } from 'vue'
+import { getCurrentInstance, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useForm, Link } from '@inertiajs/inertia-vue3'
 import { Inertia } from '@inertiajs/inertia'
 import DashboardLayout from '@/Layouts/DashboardLayout.vue'
@@ -93,6 +93,11 @@ const destroy = async document => {
 }
 
 const submit = () => form.id ? update() : store()
+
+const esc = e => e.key === 'Escape' && close()
+
+onMounted(() => window.addEventListener('keydown', esc))
+onUnmounted(() => window.removeEventListener('keydown', esc))
 </script>
 
 <template>
