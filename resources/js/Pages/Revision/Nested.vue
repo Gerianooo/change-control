@@ -38,7 +38,7 @@ const destroy = async procedure => {
     @change="save">
     <template #item="{ element }">
       <div class="flex flex-col space-y-1">
-        <div class="flex items-center space-x-2 bg-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-900 rounded-md px-4 py-2 transition-all cursor-move">
+        <div class="flex items-center space-x-2 bg-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-600 rounded-md px-4 py-2 transition-all duration-300 cursor-move">
           <div @click.prevent="!element.childs?.length && click(element)" class="flex items-center space-x-2 w-full" :class="{
             'cursor-pointer': !element.childs?.length,
             'cursor-move': !!element.childs?.length,
