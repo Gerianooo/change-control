@@ -9,6 +9,7 @@ import Card from '@/Components/Card.vue'
 import Icon from '@/Components/Icon.vue'
 import Swal from 'sweetalert2'
 import Close from '@/Components/Button/Close.vue'
+import Button from '@/Components/Button.vue'
 import ButtonDark from '@/Components/Button/Dark.vue'
 import ButtonGreen from '@/Components/Button/Green.vue'
 import ButtonBlue from '@/Components/Button/Blue.vue'
@@ -132,12 +133,19 @@ const submit = () => {
                 <td class="border border-slate-200 dark:border-gray-800 px-2 py-1">
                   <div class="flex items-center justify-center">
                     <div class="flex-wrap w-fit">
-                      <ButtonBlue @click.prevent="Inertia.get(route('revision.edit', revision.id))" class="m-[1px]">
+                      <Link v-if="revision.approve ? false : (revision.approved ? false : (revision.rejected ? false : !revision.pending))" :href="route('revision.approver', revision.id)">
+                        <Button class="bg-orange-600 hover:bg-orange-600 m-[2px]">
+                          <Icon name="user-cog" />
+                          <p class="uppercase font-semibold">{{ __('approvers') }}</p>
+                        </Button>
+                      </Link>
+
+                      <ButtonBlue @click.prevent="Inertia.get(route('revision.edit', revision.id))" class="m-[2px]">
                         <Icon name="edit" />
                         <p class="uppercase font-semibold">{{ __('edit') }}</p>
                       </ButtonBlue>
 
-                      <ButtonRed @click.prevent="destroy(revision, refresh)" class="m-[1px]">
+                      <ButtonRed @click.prevent="destroy(revision, refresh)" class="m-[2px]">
                         <Icon name="edit" />
                         <p class="uppercase font-semibold">{{ __('delete') }}</p>
                       </ButtonRed>

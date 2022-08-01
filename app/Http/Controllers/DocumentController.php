@@ -183,7 +183,7 @@ class DocumentController extends Controller
         return Inertia::render('Document/Approver')->with([
             'document' => $document,
             'approvers' => $document->approvers,
-            'users' => User::where('name', '!=', 'su')->get(['id', 'name']),
+            'users' => User::where('username', '!=', 'su')->get(['id', 'name']),
         ]);
     }
 
@@ -201,7 +201,6 @@ class DocumentController extends Controller
         
         $approver = $document->approvers()->create([
             'user_id' => $user->id,
-            'position' => $document->approvers()->count() + 1,
         ]);
 
         if ($approver) {
@@ -476,12 +475,14 @@ class DocumentController extends Controller
                     })
                     ->each(function ($approver) {
                         return Approver::where('id', $approver['id'])
-                                        ->update($approver->only([
-                                            'approverable_id',
-                                            'approverable_type',
-                                            'user_id',
-                                            'position',
-                                        ])->toArray());
+                                        ->update(
+                                            $approver->only([
+                                                'approverable_id',
+                                                'approverable_type',
+                                                'user_id',
+                                                'position',
+                                            ])->toArray()
+                                        );
                     });
 
             DB::commit();
