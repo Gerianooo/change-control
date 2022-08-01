@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Content;
+use App\Notifications\ContentHotReloadNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class ContentController extends Controller
 {
@@ -45,6 +47,10 @@ class ContentController extends Controller
         ]);
 
         if ($content) {
+            Notification::send($content, new ContentHotReloadNotification(
+                $content,
+            ));
+
             return redirect()->back()->with('success', __(
                 'content has been saved',
             ));

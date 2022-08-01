@@ -434,7 +434,11 @@ class RevisionController extends Controller
      */
     public function show(Revision $revision)
     {
-        //
+        return Inertia::render('Revision/Show')->with([
+            'document' => $revision->document,
+            'revision' => $revision,
+            'procedures' => $revision->procedures,
+        ]);
     }
 
     /**

@@ -1,5 +1,5 @@
 <script setup>
-import { getCurrentInstance, ref, onMounted, onUpdated } from 'vue'
+import { getCurrentInstance, ref, onMounted, onUpdated, onUnmounted } from 'vue'
 import { useForm, Link } from '@inertiajs/inertia-vue3'
 import DashboardLayout from '@/Layouts/DashboardLayout.vue'
 import Card from '@/Components/Card.vue'
@@ -35,11 +35,16 @@ const getFromStorage = () => localStorage.getItem(key) && (form.value = localSto
 const saveToStorage = () => localStorage.setItem(key, form.value)
 const deleteFromStorage = () => localStorage.removeItem(key)
 
+const ctrlAndSave = e => e.ctrlKey && e.key === 's' && (e.preventDefault() || submit())
+
 onMounted(getFromStorage)
+
+onMounted(() => window.addEventListener('keydown', ctrlAndSave))
+onUnmounted(() => window.removeEventListener('keydown', ctrlAndSave))
 </script>
 
 <template>
-  <DashboardLayout :title="__('content')">
+  <DashboardLayout :title="__('Content')">
     <Card class="flex flex-col bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md">
       <template #header>
         <div class="flex items-center space-x-1 rounded-t-md p-2 bg-slate-200 dark:bg-gray-800">

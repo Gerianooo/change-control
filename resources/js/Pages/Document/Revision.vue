@@ -147,6 +147,13 @@ const submit = () => {
                     <td class="border border-inherit px-2 py-1">
                       <div class="flex items-center justify-center">
                         <div class="flex-wrap w-fit">
+                          <Link :href="route('revision.show', revision.id)">
+                            <ButtonBlue>
+                              <Icon name="play" />
+                              <p class="uppercase font-semibold">{{ __('preview') }}</p>
+                            </ButtonBlue>
+                          </Link>
+
                           <Link v-if="revision.approve ? false : (revision.approved ? false : (revision.rejected ? false : !revision.pending))" :href="route('revision.approver', revision.id)">
                             <Button class="bg-orange-600 hover:bg-orange-600 m-[2px]">
                               <Icon name="user-cog" />

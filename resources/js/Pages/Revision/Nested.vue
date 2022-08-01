@@ -43,7 +43,7 @@ const destroy = async procedure => {
             'cursor-pointer': !element.childs?.length,
             'cursor-move': !!element.childs?.length,
           }">
-            <!-- <p class="font-bold">{{ element.position }}</p> -->
+            <p class="font-bold">{{ element.position }}.</p>
             <p class="uppercase">{{ element.name }}</p>
           </div>
 

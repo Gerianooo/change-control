@@ -20,6 +20,13 @@ class Procedure extends Model
     ];
 
     /**
+     * @var string[]
+     */
+    protected $with = [
+        'content',
+    ];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function revision()
