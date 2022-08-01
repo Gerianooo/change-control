@@ -14,7 +14,7 @@ const { url, sticky } = defineProps({
 })
 
 const paginator = ref({})
-const processing = ref(true)
+const processing = ref(false)
 const last = ref(null)
 const config = useForm({
   page: 1,
@@ -102,6 +102,10 @@ const rounded = () => {
   links && links.firstElementChild?.classList.add('rounded-l-md')
   links && links.lastElementChild?.classList.add('rounded-r-md')
 }
+
+defineExpose({
+  refresh: fetch,
+})
 
 onMounted(fetch)
 onMounted(() => config.sticky && createFloatingTh())
