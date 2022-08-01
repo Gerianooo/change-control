@@ -153,6 +153,204 @@ class RevisionController extends Controller
     }
 
     /**
+     * @param \App\Models\Revision $revision
+     * @return \Illuminate\Http\Response
+     */
+    public function approval(Revision $revision)
+    {
+        return Inertia::render('Revision/Approval')->with([
+            'revision' => $revision,
+            'approves' => $revision->approves,
+            'approvers' => $revision->approvers,
+        ]);
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Revision $document
+     * @return \Illuminate\Http\Response
+     */
+    public function request(Request $request, Revision $revision)
+    {
+        if ($revision->pending && !$revision->rejected) {
+            return redirect()->back()->with('error', __(
+                'revision is waiting for response approver',
+            ));
+        }
+
+        if ($revision->approved) {
+            return redirect()->back()->with('error', __(
+                'revision is already approved',
+            ));
+        }
+
+        $user = $request->user();
+        $approve = $revision->approves()->create();
+        $revision->approvers->each(function (Approver $approver) use ($revision, $approve, $user) {
+            $approve->approvals()->create([
+                'status' => 'pending',
+                'requester_id' => $user->id,
+                'requested_at' => now(),
+                'responder_id' => $approver->user->id,
+            ]);
+        });
+
+        return redirect()->back()->with('success', __(
+            'approval has been requested',
+        ));
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Revision $revision
+     * @return \Illuminate\Http\Response
+     */
+    public function approve(Request $request, Revision $revision)
+    {
+        $user = $request->user();
+        $approve = $revision->approve;
+        $approvers = $revision->approvers;
+
+        if (!$approve) {
+            return redirect()->back()->with('error', __(
+                'nothing to do',
+            ));
+        }
+
+        if ($revision->rejected) {
+            return redirect()->back()->with('error', __(
+                'revision is rejected',
+            ));
+        }
+
+        if ($revision->approved) {
+            return redirect()->back()->with('info', __(
+                'revision is already approved',
+            ));
+        }
+
+        if (!$user->hasRole('superuser')) {
+            if ($current = $approvers->where('user_id', $user->id)->first()) {
+                if (($before = $approvers->where('position', $current->position - 1)->first()) && ($latest = $approve->approvals->where('responder_id', $before->user_id)->first())) {
+                    if ($latest->status !== 'approved') {
+                        return redirect()->back()->with('error', __(
+                            'user `:name` haven\'t response the approval', [
+                                'name' => $latest->responder->name,
+                            ]
+                        ));
+                    }
+                }
+            } else {
+                return redirect()->back()->with('error', __(
+                    'can\'t find approval for you',
+                ));
+            }
+        }
+        
+        $approval = $approve->approvals
+                            ->where('status', 'pending')
+                            ->when(!$user->hasRole('superuser'), function ($query) use ($user) {
+                                $query->where('responder_id', $user->id);
+                            })
+                            ->first();
+
+        if ($approval) {
+            if ($approval->update(['status' => 'approved'])) {
+                return redirect()->back()->with('success', __(
+                    'revision `:name` successfuly approved', [
+                        'name' => $revision->name,
+                    ],
+                ));
+            }
+
+            return redirect()->back()->with('error', __(
+                'can\'t approve revision, try again later',
+            ));
+        }
+
+        return redirect()->back()->with('error', __(
+            'can\'t find approval for you',
+        ));
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Revision $revision
+     * @return \Illuminate\Http\Response
+     */
+    public function reject(Request $request, Revision $revision)
+    {
+        $request->validate([
+            'note' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $approve = $revision->approve;
+        $approvers = $revision->approvers;
+
+        if (!$approve) {
+            return redirect()->back()->with('error', __(
+                'nothing to do',
+            ));
+        }
+
+        if ($revision->rejected) {
+            return redirect()->back()->with('error', __(
+                'revision already is rejected',
+            ));
+        }
+
+        if ($revision->approved) {
+            return redirect()->back()->with('info', __(
+                'revision is already approved',
+            ));
+        }
+
+        if (!$user->hasRole('superuser')) {
+            if ($current = $approvers->where('user_id', $user->id)->first()) {
+                if (($before = $approvers->where('position', $current->position - 1)->first()) && ($latest = $approve->approvals->where('responder_id', $before->user_id)->first())) {
+                    if ($latest->status !== 'approved') {
+                        return redirect()->back()->with('error', __(
+                            'user `:name` haven\'t response the approval', [
+                                'name' => $latest->responder->name,
+                            ]
+                        ));
+                    }
+                }
+            } else {
+                return redirect()->back()->with('error', __(
+                    'can\'t find approval for you',
+                ));
+            }
+        }
+        
+        $approval = $approve->approvals
+                            ->where('status', 'pending')
+                            ->when(!$user->hasRole('superuser'), function ($query) use ($user) {
+                                $query->where('responder_id', $user->id);
+                            })
+                            ->first();
+
+        if ($approval) {
+            if ($approval->update(['status' => 'rejected', 'responder_note' => $request->note])) {
+                return redirect()->back()->with('success', __(
+                    'revision `:name` successfuly rejected', [
+                        'name' => $revision->name,
+                    ],
+                ));
+            }
+
+            return redirect()->back()->with('error', __(
+                'can\'t reject revision, try again later',
+            ));
+        }
+
+        return redirect()->back()->with('error', __(
+            'can\'t find approval for you',
+        ));
+    }
+
+    /**
      * @param \Illuminate\Http\Request $request
      * @param \App\Models\Document $document
      * @return \Illuminate\Http\Response

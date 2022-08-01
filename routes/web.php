@@ -38,11 +38,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/revisions', 'revisions')->name('revisions');
         Route::get('/approvers', 'approvers')->name('approvers');
         Route::post('/approvers/{user}', 'addApproverFor')->name('approver.add');
-        Route::get('/approvals', 'approvals')->name('approvals');
+        Route::patch('/approver/save', 'saveApproverFor')->name('approver.save');
+
+        Route::get('/approval', 'approvals')->name('approvals');
         Route::post('/request', 'request')->name('approval.request');
         Route::patch('/approve', 'approve')->name('approve');
         Route::patch('/reject', 'reject')->name('reject');
-        Route::patch('/approver/save', 'saveApproverFor')->name('approver.save');
     });
     Route::prefix('/document/{approver}')->name('document.')->controller(App\Http\Controllers\DocumentController::class)->group(function () {
         Route::delete('/detach', 'detachApprover')->name('approver.detach');
@@ -54,6 +55,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/approver', 'approver')->name('approver');
         Route::post('/attach/{user}', 'addApproverFor')->name('approver.add');
         Route::patch('/approver/save', 'saveApproverFor')->name('approver.save');
+
+        Route::get('/approval', 'approval')->name('approvals');
+        Route::post('/request', 'request')->name('approval.request');
+        Route::patch('/approve', 'approve')->name('approve');
+        Route::patch('/reject', 'reject')->name('reject');
     });
     Route::prefix('/revision/{approver}/approver')->name('revision.')->controller(App\Http\Controllers\RevisionController::class)->group(function () {
         Route::delete('/detach', 'detachApprover')->name('approver.detach');

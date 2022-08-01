@@ -29,6 +29,29 @@ class Revision extends Model
     ];
 
     /**
+     * @var string[]
+     */
+    protected $withCount = [
+        'approvers',
+    ];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function approves()
+    {
+        return $this->morphMany(Approve::class, 'approvable');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function approve()
+    {
+        return $this->morphOne(Approve::class, 'approvable')->orderBy('created_at', 'desc');
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function approvers()
@@ -41,7 +64,7 @@ class Revision extends Model
      */
     public function approvals()
     {
-        return $this->morphMany(Approval::class, 'approvalable')->orderBy('position');
+        return $this->morphMany(Approval::class, 'approvalable');
     }
 
     /**
@@ -72,10 +95,7 @@ class Revision extends Model
         return Attribute::make(
             get: function () {
                 if ($approve = $this->approve) {
-                    return $approve->approvals
-                                    ->where('status', '!=', 'rejected')
-                                    ->where('status', 'pending')
-                                    ->isNotEmpty();
+                    return ! $this->rejected && ! $this->approved;
                 }
 
                 return false;

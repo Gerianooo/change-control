@@ -140,12 +140,17 @@ const submit = () => {
                         </Button>
                       </Link>
 
-                      <ButtonBlue @click.prevent="Inertia.get(route('revision.edit', revision.id))" class="m-[2px]">
+                      <Button v-if="revision.approvers_count > 0" @click.prevent="Inertia.get(route('revision.approvals', revision.id))" class="bg-cyan-600 hover:bg-cyan-700 m-[2px]">
+                        <Icon name="user-check" />
+                        <p class="uppercase font-semibold">{{ __('approvals') }}</p>
+                      </Button>
+
+                      <ButtonBlue v-if="revision.approved ? false : (revision.rejected ? true : !revision.pending)" @click.prevent="Inertia.get(route('revision.edit', revision.id))" class="m-[2px]">
                         <Icon name="edit" />
                         <p class="uppercase font-semibold">{{ __('edit') }}</p>
                       </ButtonBlue>
 
-                      <ButtonRed @click.prevent="destroy(revision, refresh)" class="m-[2px]">
+                      <ButtonRed v-if="revision.approved ? false : (revision.rejected ? true : !revision.pending)" @click.prevent="destroy(revision, refresh)" class="m-[2px]">
                         <Icon name="edit" />
                         <p class="uppercase font-semibold">{{ __('delete') }}</p>
                       </ButtonRed>
