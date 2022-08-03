@@ -105,7 +105,7 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
     <Card class="bg-white dark:bg-gray-700 dark:text-gray-200">
       <template #header>
         <div class="flex items-center space-x-2 bg-slate-200 dark:bg-gray-800 p-2">
-          <ButtonGreen @click.prevent="show">
+          <ButtonGreen @click.prevent="(form.id = null) || show">
             <Icon name="plus" />
             <p class="uppercase font-semibold">{{ __('create') }}</p>
           </ButtonGreen>
