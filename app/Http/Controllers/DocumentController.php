@@ -285,7 +285,7 @@ class DocumentController extends Controller
 
         $user = $request->user();
         $approve = $document->approves()->create();
-        $document->approvers->each(function (Approver $approver) use ($document, $approve, $user) {
+        $document->approvers->each(function (Approver $approver) use ($approve, $user) {
             $approve->approvals()->create([
                 'status' => 'pending',
                 'requester_id' => $user->id,
