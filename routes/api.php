@@ -21,6 +21,8 @@ Route::prefix('/v1')->name('api.v1.')->middleware(['auth:sanctum'])->group(funct
     Route::post('/document/{document}/revisions', [App\Http\Controllers\RevisionController::class, 'paginate'])->name('revision.paginate');
     Route::get('/revision/{revision}/procedures', [App\Http\Controllers\RevisionController::class, 'procedures'])->name('revision.procedures');
 
+    Route::resource('attachment', App\Http\Controllers\AttachmentController::class);
+
     Route::name('superuser.')->group(function () {
         Route::get('/superuser/permission', [App\Http\Controllers\Superuser\PermissionController::class, 'get'])->name('permission');
         Route::get('/superuser/role', [App\Http\Controllers\Superuser\RoleController::class, 'get'])->name('role');

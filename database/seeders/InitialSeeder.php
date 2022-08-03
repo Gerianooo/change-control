@@ -68,16 +68,29 @@ class InitialSeeder extends Seeder
             });
         });
 
+        collect(['document', 'revision'])->each(function ($name) {
+            collect(['set %s approver', 'request %s approval'])->each(function ($ability) use ($name) {
+                Permission::create([
+                    'name' => sprintf($ability, $name),
+                    'guard_name' => 'web',
+                ]);
+            });
+        });
+
         $mr->givePermissionTo([
             'create document',
             'read document',
             'update document',
             'delete document',
+            'set document approver',
+            'request document approval',
             
             'create revision',
             'read revision',
             'update revision',
             'delete revision',
+            'set revision approver',
+            'request revision approval',
         ]);
     }
 }

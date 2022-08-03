@@ -16,7 +16,11 @@ class Revision extends Model
     protected $fillable = [
         'document_id',
         'code',
+        'classification',
+        'reason_change',
+        'level',
         'expired_at',
+        'created_by_id',
     ];
 
     /**
@@ -34,6 +38,14 @@ class Revision extends Model
     protected $withCount = [
         'approvers',
     ];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function attachments()
+    {
+        return $this->morphMany(Attachment::class, 'attachmentable');
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
@@ -85,6 +97,14 @@ class Revision extends Model
                     ->whereNull('parent_id')
                     ->with(['childs'])
                     ->withCount('childs');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function createdBy()
+    {
+        return $this->hasOne(User::class, 'id', 'created_by_id');
     }
 
     /**
@@ -149,13 +169,21 @@ class Revision extends Model
             $latest = $document->revision;
 
             if ($latest) {
-                $revision->code = preg_replace_callback(sprintf('/^(%s)-([\d]+)$/', $document->code), function ($matches) {
-                    $number = (int) $matches[2];
+                $revision->code = preg_replace_callback(sprintf('/^(%s)-([\d]+)-([\d]+)$/', $document->code), function ($matches) use ($revision) {
+                    $major = (int) $matches[2];
+                    $minor = (int) $matches[3];
 
-                    return sprintf('%s-%d', $matches[1], $number + 1);
+                    if (mb_strtolower($revision->classification) === 'major') {
+                        $major += 1;
+                        $minor = 0;
+                    } else {
+                        $minor += 1;
+                    }
+
+                    return sprintf('%s-%d-%d', $matches[1], $major, $minor);
                 }, $latest->code);
             } else {
-                $revision->code = $document->code . '-0';
+                $revision->code = $document->code . '-0-0';
             }
         });
 
@@ -166,6 +194,10 @@ class Revision extends Model
                     ->update([
                         'expired_at' => now(),
                     ]);
+        });
+
+        static::deleted(function (Revision $revision) {
+            $revision->attachments()->delete();
         });
     }
 }

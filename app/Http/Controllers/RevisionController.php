@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Approver;
+use App\Models\Attachment;
 use App\Models\Document;
 use App\Models\Revision;
 use App\Models\User;
@@ -365,6 +366,7 @@ class RevisionController extends Controller
         ]);
 
         return $document->revisions()
+                        ->with(['attachments'])
                         ->where(function (Builder $query) use ($request) {
                             $model = new Revision();
                             $search = '%' . $request->search . '%';
@@ -406,14 +408,40 @@ class RevisionController extends Controller
     {
         $request->validate([
             'document_id' => 'required|integer|exists:documents,id',
+            'classification' => 'required|in:major,minor',
+            'reason_change' => 'required|string',
+            'attachments.*.name' => 'required|string',
+            'attachments.*.file' => 'required|file',
         ]);
 
+        $user = $request->user();
         $document = Document::findOrFail($request->document_id);
-        $count = $document->revisions()->count();
         $expired = now()->addMonth($document->max_revision_interval);
-        $code = sprintf('%s-%d', $document->code, $count);
-        
-        if ($revision = $document->revisions()->create([ 'code' => $code, 'expired_at' => $expired ])) {
+        $post = $request->only([
+            'classification',
+            'reason_change',
+        ]);
+
+        if ($revision = $document->revisions()->create([ ...$post, 'expired_at' => $expired, 'created_by_id' => $user->id, ])) {
+            collect($request->attachments ?: [])->each(function ($attachment) use ($revision) {
+                /**
+                 * @var string $name
+                 * @var \Illuminate\Http\UploadedFile $file
+                 */
+                extract($attachment);
+    
+                $filename = hash('sha256', uniqid(more_entropy: true));
+                $ext = $file->getClientOriginalExtension();
+                $path = '/public/attachments';
+    
+                $file->storeAs($path, $filename . '.' . $ext);
+    
+                $revision->attachments()->create([
+                    'name' => $name,
+                    'filename' => $filename . '.' . $ext,
+                ]);
+            });
+
             return redirect()->back()->with('success', __(
                 'revision `:code` has been created', [
                     'code' => $revision->code,
@@ -463,7 +491,36 @@ class RevisionController extends Controller
      */
     public function update(Request $request, Revision $revision)
     {
-        //
+        $request->validate([
+            'document_id' => 'required|integer|exists:documents,id',
+            'classification' => 'required|in:major,minor',
+            'reason_change' => 'required|string',
+            'attachments.*.name' => 'required|string',
+            'attachments.*.file' => 'required',
+        ]);
+
+        $post = $request->only([
+            'classification',
+            'reason_change',
+        ]);
+
+        if ($revision->update($post)) {
+            collect($request->attachments ?: [])->each(function ($attachment) {
+                Attachment::where('id', $attachment['id'])->update([
+                    'name' => $attachment['name'],
+                ]);
+            });
+
+            return redirect()->back()->with('success', __(
+                'revision `:code` has been updated', [
+                    'code' => $revision->code,
+                ],
+            ));
+        }
+
+        return redirect()->back()->with('error', __(
+            'can\'t update revision',
+        ));
     }
 
     /**

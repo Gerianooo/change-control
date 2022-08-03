@@ -18,8 +18,20 @@ return new class extends Migration
             $table->foreignId('document_id')
                     ->constrained()
                     ->cascadeOnDelete();
-            $table->string('code')->unique();
+            $table->string('code')
+                    ->unique();
+            $table->enum('classification', ['major', 'minor']);
+            $table->longText('reason_change');
+            $table->unsignedTinyInteger('level')
+                    ->nullable()
+                    ->default(null);
+            $table->unsignedBigInteger('created_by_id');
             $table->timestamps();
+
+            $table->foreign('created_by_id')
+                    ->references('id')
+                    ->on('users')
+                    ->cascadeOnDelete();
         });
     }
 

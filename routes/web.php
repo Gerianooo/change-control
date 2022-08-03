@@ -71,6 +71,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     Route::resource('content', App\Http\Controllers\ContentController::class);
 
+    Route::resource('attachment', App\Http\Controllers\AttachmentController::class);
+
     Route::prefix('/superuser')->name('superuser.')->group(function () {
         Route::resource('permission', App\Http\Controllers\Superuser\PermissionController::class)->only([
             'index', 'store', 'update', 'destroy',
