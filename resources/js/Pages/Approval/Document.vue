@@ -10,16 +10,9 @@ import Swal from 'sweetalert2';
 import { useForm } from '@inertiajs/inertia-vue3';
 
 const self = getCurrentInstance()
-const table = ref({
-  refresh: null,
-})
+const table = ref(null)
 
-const fork = (data, refresh) => {
-  table.value.refresh = refresh
-  return data
-}
-
-const fetch = () => table.value.refresh && table.value.refresh()
+const fetch = () => table.value?.refresh && table.value.refresh()
 
 const preview = document => {
   console.log(document)
@@ -69,7 +62,7 @@ Inertia.on('finish', e => fetch())
 
       <template #footer>
         <div class="flex flex-col space-y-2 p-4">
-          <Builder :url="route('approval.document.paginate')">
+          <Builder ref="table" :url="route('approval.document.paginate')">
             <template v-slot:thead="table">
               <tr class="bg-slate-200 dark:bg-gray-800">
                 <Th class="border border-slate-300 dark:border-gray-900 text-center uppercase p-2" :table="table" :sort="false">{{ __('no') }}</Th>
@@ -79,9 +72,9 @@ Inertia.on('finish', e => fetch())
               </tr>
             </template>
 
-            <template v-slot:tbody="{ data, refresh }">
-              <template v-if="data?.filter(d => ! d.approved)?.length > 0">
-                <tr v-for="(document, i) in fork(data.filter(d => ! d.approved), refresh)" :key="i">
+            <template v-slot:tbody="{ data }">
+              <template v-if="data?.length > 0">
+                <tr v-for="(document, i) in data" :key="i">
                   <td class="border border-slate-200 dark:border-gray-800 text-center py-1">{{ i + 1 }}</td>
                   <td class="border border-slate-200 dark:border-gray-800 px-2 py-1">{{ __(document.name) }}</td>
                   <td class="border border-slate-200 dark:border-gray-800 px-2 py-1">{{ __(document.max_revision_interval) }}</td>
