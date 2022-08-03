@@ -26,7 +26,9 @@ const approve = async document => {
     showCloseButton: true,
   })
 
-  response.isConfirmed && Inertia.patch(route('document.approve', document.id))
+  response.isConfirmed && useForm({}).patch(route('document.approve', document.id), {
+    onFinish: () => fetch(),
+  })
 }
 
 const reject = async document => {
@@ -45,10 +47,10 @@ const reject = async document => {
     },
   })
 
-  response.isConfirmed && useForm({ note: response.value }).patch(route('document.reject', document.id))
+  response.isConfirmed && useForm({ note: response.value }).patch(route('document.reject', document.id), {
+    onFinish: () => fetch(),
+  })
 }
-
-Inertia.on('finish', e => fetch())
 </script>
 
 <template>
