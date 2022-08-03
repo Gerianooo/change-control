@@ -7,7 +7,7 @@ const open = ref(false)
 </script>
 
 <template>
-  <div @focusout="open = false" class="relative">
+  <div @mouseleave="open = false" class="relative">
     <Button @click.prevent="open = ! open" class="bg-gray-800 hover:bg-gray-700 active:bg-gray-900">
       <Icon name="caret-down" />
       <p class="uppercase font-semibold">action</p>
