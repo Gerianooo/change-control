@@ -100,6 +100,14 @@ class Document extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function authorizations()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     public function pending() : Attribute

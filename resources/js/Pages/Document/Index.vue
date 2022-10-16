@@ -9,6 +9,7 @@ import Card from '@/Components/Card.vue'
 import Icon from '@/Components/Icon.vue'
 import Modal from '@/Components/Modal.vue'
 import Close from '@/Components/Button/Close.vue'
+import Action from '@/Components/Button/Action.vue'
 import ButtonGreen from '@/Components/Button/Green.vue'
 import ButtonBlue from '@/Components/Button/Blue.vue'
 import ButtonRed from '@/Components/Button/Red.vue'
@@ -16,8 +17,12 @@ import Button from '@/Components/Button.vue'
 import Swal from 'sweetalert2'
 import Input from '@/Components/Input.vue'
 import InputError from '@/Components/InputError.vue'
+import Select from '@vueform/multiselect'
 
 const self = getCurrentInstance()
+const { users } = defineProps({
+  users: Array,
+})
 const open = ref(false)
 const table = ref(null)
 const form = useForm({
@@ -25,6 +30,11 @@ const form = useForm({
   name: '',
   code: '',
   max_revision_interval: 36,
+})
+
+const authorization = ref(false)
+const authorized = useForm({
+  users: [],
 })
 
 const show = () => {
@@ -96,9 +106,16 @@ const submit = () => form.id ? update() : store()
 
 const esc = e => e.key === 'Escape' && close()
 
+const sync = () => {
+  console.log(authorized.users)
+}
+
 onMounted(() => window.addEventListener('keydown', esc))
 onUnmounted(() => window.removeEventListener('keydown', esc))
 </script>
+
+<style src="@vueform/multiselect/themes/default.css"></style>
+<style src="@/multiselect.css"></style>
 
 <template>
   <DashboardLayout :title="__('Document')">
@@ -170,8 +187,8 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
                     <td class="border border-inherit px-2 py-1">{{ document.revision?.code }}</td>
                     <td class="border border-inherit px-2 py-1">
                       <div class="flex items-center justify-center">
-                        <div class="flex-wrap w-fit">
-                          <Button v-if="document.approved" @click.prevent="Inertia.get(route('document.revisions', document.id))" class="bg-emerald-600 hover:bg-emerald-700 m-[1px]">
+                        <Action> 
+                          <Button v-if="document.approved" @click.prevent="Inertia.get(route('document.revisions', document.id))" class="w-full bg-emerald-600 hover:bg-emerald-700 m-[1px]">
                             <Icon name="list" />
                             <p class="uppercase font-semibold">{{ __('revisions') }}</p>
                           </Button>
@@ -181,9 +198,14 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
                             <p class="uppercase font-semibold">{{ __('approvers') }}</p>
                           </Button>
 
-                          <Button v-if="document.approvers_count > 0" @click.prevent="Inertia.get(route('document.approvals', document.id))" class="bg-cyan-600 hover:bg-cyan-700 m-[1px]">
+                          <Button v-if="document.approvers_count > 0" @click.prevent="Inertia.get(route('document.approvals', document.id))" class="w-full bg-cyan-600 hover:bg-cyan-700 m-[1px]">
                             <Icon name="user-check" />
                             <p class="uppercase font-semibold">{{ __('approvals') }}</p>
+                          </Button>
+
+                          <Button @click.prevent="authorization = true" class="w-full bg-teal-500 hover:bg-teal-600 active:bg-teal-700 m-[1px]">
+                            <Icon name="user" />
+                            <p class="uppercase font-semibold">{{ __('authorization') }}</p>
                           </Button>
 
                           <ButtonBlue v-if="document.approved ? false : (document.rejected ? true : !document.pending)" @click.prevent="edit(document)" class="m-[1px]">
@@ -195,7 +217,7 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
                             <Icon name="edit" />
                             <p class="uppercase font-semibold">{{ __('delete') }}</p>
                           </ButtonRed>
-                        </div>
+                        </Action>
                       </div>
                     </td>
                   </tr>
@@ -270,6 +292,51 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
             <ButtonGreen type="submit">
               <Icon name="check" />
               <p class="uppercase font-semibold">{{ __(form.id ? 'update' : 'create') }}</p>
+            </ButtonGreen>
+          </div>
+        </template>
+      </Card>
+    </form>
+  </Modal>
+
+  <Modal :show="authorization">
+    <form @submit.prevent="sync" class="w-full max-w-xl h-fit shadow-xl">
+      <Card class="bg-white dark:bg-gray-700 dark:text-gray-200">
+        <template #header>
+          <div class="flex items-center space-x-2 justify-end bg-gray-200 dark:bg-gray-800 p-2">
+            <Close @click.prevent="authorization = false" />
+          </div>
+        </template>
+
+        <template #body>
+          <div class="p-4">
+            <div class="flex flex-col space-y-1">
+              <label for="users" class="lowercase first-letter:capitalize">
+                {{ __('this document will be shown to the user in the list') }}
+              </label>
+
+              <Select
+                v-model="authorized.users"
+                :options="users.map(u => ({
+                  label: u.name,
+                  value: u.id,
+                }))"
+                :searchable="true"
+                :clearOnSelect="false"
+                :clearOnSearch="false"
+                mode="tags"
+                class="uppercase" />
+
+              <InputError :error="authorized.errors.users" />
+            </div>
+          </div>
+        </template>
+
+        <template #footer>
+          <div class="flex items-center space-x-2 justify-end bg-gray-200 dark:bg-gray-800 px-2 py-1">
+            <ButtonGreen type="submit">
+              <Icon name="check" />
+              <p class="uppercase font-semibold">{{ __('save') }}</p>
             </ButtonGreen>
           </div>
         </template>

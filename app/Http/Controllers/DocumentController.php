@@ -21,7 +21,9 @@ class DocumentController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Document/Index');
+        return Inertia::render('Document/Index')->with([
+            'users' => User::where('id', '!=', 1)->get(['id', 'name']),
+        ]);
     }
 
     /**

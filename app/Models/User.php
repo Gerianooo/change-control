@@ -66,6 +66,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function documents()
+    {
+        return $this->belongsToMany(Document::class);
+    }
+
+    /**
      * @return \Illuminate\Support\Collection
      */
     public function menus()
